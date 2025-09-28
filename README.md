@@ -1,73 +1,63 @@
-# React + TypeScript + Vite
+# SpaceX Mission Explorer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A responsive React application that showcases SpaceX launch data from the public v4 API. Users can filter, search, paginate, and favorite launches, then inspect detailed mission info in an accessible modal.
 
-Currently, two official plugins are available:
+## 🚀 Features
+- Debounced search, launch year dropdown, success filter, and favorites-only toggle
+- Favorites persisted locally with context-based state sharing
+- Paginated grid (9 launches per page) with responsive layout and keyboard support
+- Mission detail modal with patch imagery, rocket info, and external links (Wikipedia, Webcast, Article)
+- Loading skeletons, error handling, and empty states to keep the UI resilient
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🛠️ Tech Stack
+- **React 19 + TypeScript** for component-driven UI and type safety
+- **Vite** for fast dev server and bundling
+- **Vitest + React Testing Library** for unit/integration tests in a JSDOM environment
+- **Plain CSS** powered by modern layout primitives (grid, flex, clamp) for responsiveness
 
-## React Compiler
+## 📦 Getting Started
+1. **Install dependencies**
+   ```bash
+   npm install
+   ```
+2. **Run the dev server**
+   ```bash
+   npm run dev
+   ```
+   Open the printed URL to explore the app (defaults to http://localhost:5173).
+3. **Create a production build**
+   ```bash
+   npm run build
+   ```
+4. **Preview the production build (optional)**
+   ```bash
+   npm run preview
+   ```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## ✅ Running Tests
+Execute the Vitest suite (includes coverage for filtering, favorites, and mission detail modal):
+```bash
+npm run test
+# or
+npm run test:run
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🔍 Project Structure Highlights
+- `src/App.tsx` – Core page layout, data fetching, filters, pagination
+- `src/components/` – Reusable UI pieces (cards, filters, modal, skeletons, pagination)
+- `src/context/FavoritesContext.tsx` – Favorites state with localStorage persistence
+- `src/api/spacex.ts` – Query helper for SpaceX launches
+- `src/__tests__/App.test.tsx` – React Testing Library scenarios covering key behaviors
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## ⚠️ Known Limitations
+- Relies on client-side fetch; no SSR or caching layer, so initial load depends on SpaceX API latency
+- No offline mode; favorites persist locally but launch data requires network access
+- Pagination is client-side only—large result sets are filtered in memory after the initial fetch
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 🤝 Contributing
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing`
+3. Commit changes: `git commit -m "Add amazing feature"`
+4. Push to branch and open a pull request
+
+Feel free to extend filters, add routing for mission details, or introduce additional telemetry as future enhancements.
