@@ -6,6 +6,8 @@ import { useDebouncedValue } from './hooks/useDebouncedValue'
 import { LaunchFilters } from './components/LaunchFilters'
 import { LaunchList } from './components/LaunchList'
 import { LaunchDetailsModal } from './components/LaunchDetailsModal'
+import { useFavorites } from './context/FavoritesContext'
+import { LaunchSkeletonList } from './components/LaunchSkeletonList'
 
 function App() {
   const [launches, setLaunches] = useState<Launch[]>([])
@@ -16,6 +18,9 @@ function App() {
   const [search, setSearch] = useState('')
   const [selectedYear, setSelectedYear] = useState('')
   const [showSuccessOnly, setShowSuccessOnly] = useState(false)
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
+
+  const { favorites, toggleFavorite, isFavorite } = useFavorites()
 
   const debouncedSearch = useDebouncedValue(search, 350)
 
@@ -67,10 +72,11 @@ function App() {
       const launchYear = new Date(launch.dateUtc).getUTCFullYear()
       const matchesYear = selectedYear ? String(launchYear) === selectedYear : true
       const matchesSuccess = showSuccessOnly ? launch.success === true : true
+      const matchesFavorite = showFavoritesOnly ? favorites.has(launch.id) : true
 
-      return matchesSearch && matchesYear && matchesSuccess
+      return matchesSearch && matchesYear && matchesSuccess && matchesFavorite
     })
-  }, [launches, debouncedSearch, selectedYear, showSuccessOnly])
+  }, [launches, debouncedSearch, selectedYear, showSuccessOnly, showFavoritesOnly, favorites])
 
   return (
     <div className="app">
@@ -87,12 +93,33 @@ function App() {
         onYearChange={setSelectedYear}
         showSuccessOnly={showSuccessOnly}
         onShowSuccessOnlyChange={setShowSuccessOnly}
+        showFavoritesOnly={showFavoritesOnly}
+        onShowFavoritesOnlyChange={setShowFavoritesOnly}
       />
 
-      {loading && <p className="status-message">Loading launches…</p>}
-      {error && !loading && <p className="status-message status-message--error">{error}</p>}
-      {!loading && !error && (
-        <LaunchList launches={filteredLaunches} onSelect={setSelectedLaunch} />
+      {loading ? (
+        <>
+          <p className="sr-only" role="status" aria-live="polite">
+            Loading launches…
+          </p>
+          <LaunchSkeletonList />
+        </>
+      ) : error ? (
+        <p className="status-message status-message--error" role="alert">
+          {error}
+        </p>
+      ) : (
+        <LaunchList
+          launches={filteredLaunches}
+          onSelect={setSelectedLaunch}
+          onToggleFavorite={toggleFavorite}
+          isFavorite={isFavorite}
+          emptyMessage={
+            showFavoritesOnly
+              ? 'No favorite missions yet. Browse missions and add some!'
+              : 'No launches match your filters yet.'
+          }
+        />
       )}
 
       {selectedLaunch && (

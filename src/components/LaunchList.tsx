@@ -1,47 +1,29 @@
 import type { Launch } from '../types'
+import { LaunchCard } from './LaunchCard'
 
 interface LaunchListProps {
   launches: Launch[]
   onSelect: (launch: Launch) => void
+  onToggleFavorite: (launchId: string) => void
+  isFavorite: (launchId: string) => boolean
+  emptyMessage?: string
 }
 
-function formatLaunchDate(dateUtc: string) {
-  const date = new Date(dateUtc)
-  return new Intl.DateTimeFormat('en', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(date)
-}
-
-function successLabel(success: boolean | null) {
-  if (success === true) return 'Success'
-  if (success === false) return 'Failure'
-  return 'TBD'
-}
-
-export function LaunchList({ launches, onSelect }: LaunchListProps) {
+export function LaunchList({ launches, onSelect, onToggleFavorite, isFavorite, emptyMessage }: LaunchListProps) {
   if (!launches.length) {
-    return <p className="empty-state">No launches match your filters yet.</p>
+    return <p className="empty-state">{emptyMessage ?? 'No launches match your filters yet.'}</p>
   }
 
   return (
-    <div className="launch-grid">
+    <div className="launch-grid" aria-live="polite">
       {launches.map((launch) => (
-        <button
+        <LaunchCard
           key={launch.id}
-          className="launch-card"
-          type="button"
-          onClick={() => onSelect(launch)}
-        >
-          <header className="launch-card__header">
-            <h2>{launch.name}</h2>
-            <span className={`badge ${launch.success === true ? 'badge--success' : launch.success === false ? 'badge--failure' : 'badge--pending'}`}>
-              {successLabel(launch.success)}
-            </span>
-          </header>
-          <p className="launch-card__date">{formatLaunchDate(launch.dateUtc)}</p>
-          <p className="launch-card__rocket">Rocket: {launch.rocketName}</p>
-        </button>
+          launch={launch}
+          onSelect={onSelect}
+          onToggleFavorite={onToggleFavorite}
+          isFavorite={isFavorite(launch.id)}
+        />
       ))}
     </div>
   )

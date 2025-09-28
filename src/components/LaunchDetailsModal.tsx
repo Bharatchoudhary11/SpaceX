@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import type { Launch } from '../types'
 
 interface LaunchDetailsModalProps {
@@ -7,6 +7,8 @@ interface LaunchDetailsModalProps {
 }
 
 export function LaunchDetailsModal({ launch, onClose }: LaunchDetailsModalProps) {
+  const dialogRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -18,17 +20,23 @@ export function LaunchDetailsModal({ launch, onClose }: LaunchDetailsModalProps)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [onClose])
 
+  useEffect(() => {
+    dialogRef.current?.focus()
+  }, [])
+
   return (
-    <div
-      className="modal-overlay"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="launch-modal-title"
-      onClick={onClose}
-    >
-      <div className="modal" onClick={(event) => event.stopPropagation()}>
+    <div className="modal-overlay" role="presentation" onClick={onClose}>
+      <div
+        className="modal"
+        onClick={(event) => event.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="launch-modal-title"
+        ref={dialogRef}
+        tabIndex={-1}
+      >
         <button type="button" className="modal__close" onClick={onClose} aria-label="Close details">
-          ×
+          <span aria-hidden="true">×</span>
         </button>
         <header className="modal__header">
           {launch.links.patchLarge || launch.links.patchSmall ? (
