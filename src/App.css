@@ -459,6 +459,16 @@
   color: #334155;
 }
 
+.modal__status {
+  margin: 0 0 0.75rem;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.modal__status--error {
+  color: #b91c1c;
+}
+
 .modal__links {
   display: flex;
   flex-wrap: wrap;
@@ -477,6 +487,15 @@
 
 .modal__links a:hover {
   background: #bae6fd;
+}
+
+.modal__link-disabled {
+  padding: 0.5rem 0.75rem;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #475569;
+  font-weight: 500;
+  font-size: 0.9rem;
 }
 
 @media (max-width: 600px) {

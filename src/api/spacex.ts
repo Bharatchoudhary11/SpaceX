@@ -29,6 +29,31 @@ interface LaunchQueryResponse {
 
 const SPACEX_QUERY_URL = 'https://api.spacexdata.com/v4/launches/query'
 
+function extractRocketName(rocket: ApiLaunch['rocket']): string {
+  if (rocket && typeof rocket === 'object' && 'name' in rocket && rocket.name) {
+    return rocket.name
+  }
+  return 'Unknown Rocket'
+}
+
+function transformLaunch(apiLaunch: ApiLaunch): Launch {
+  return {
+    id: apiLaunch.id,
+    name: apiLaunch.name,
+    dateUtc: apiLaunch.date_utc,
+    success: apiLaunch.success,
+    details: apiLaunch.details,
+    rocketName: extractRocketName(apiLaunch.rocket),
+    links: {
+      patchSmall: apiLaunch.links?.patch?.small ?? null,
+      patchLarge: apiLaunch.links?.patch?.large ?? null,
+      wikipedia: apiLaunch.links?.wikipedia ?? null,
+      webcast: apiLaunch.links?.webcast ?? null,
+      article: apiLaunch.links?.article ?? null,
+    },
+  }
+}
+
 export async function fetchLaunches(): Promise<Launch[]> {
   const response = await fetch(SPACEX_QUERY_URL, {
     method: 'POST',
@@ -51,23 +76,30 @@ export async function fetchLaunches(): Promise<Launch[]> {
 
   const payload: LaunchQueryResponse = await response.json()
 
-  return payload.docs.map((launch) => {
-    const rocket = launch.rocket && typeof launch.rocket === 'object' ? launch.rocket.name : null
+  return payload.docs.map(transformLaunch)
+}
 
-    return {
-      id: launch.id,
-      name: launch.name,
-      dateUtc: launch.date_utc,
-      success: launch.success,
-      details: launch.details,
-      rocketName: rocket ?? 'Unknown Rocket',
-      links: {
-        patchSmall: launch.links?.patch?.small ?? null,
-        patchLarge: launch.links?.patch?.large ?? null,
-        wikipedia: launch.links?.wikipedia ?? null,
-        webcast: launch.links?.webcast ?? null,
-        article: launch.links?.article ?? null,
+export async function fetchLaunchById(id: string): Promise<Launch | null> {
+  const response = await fetch(SPACEX_QUERY_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      query: { _id: id },
+      options: {
+        populate: ['rocket'],
+        limit: 1,
       },
-    }
+    }),
   })
+
+  if (!response.ok) {
+    throw new Error('Unable to fetch launch details')
+  }
+
+  const payload: LaunchQueryResponse = await response.json()
+  const launch = payload.docs[0]
+
+  return launch ? transformLaunch(launch) : null
 }

@@ -4,9 +4,11 @@ import type { Launch } from '../types'
 interface LaunchDetailsModalProps {
   launch: Launch
   onClose: () => void
+  isLoading: boolean
+  errorMessage: string | null
 }
 
-export function LaunchDetailsModal({ launch, onClose }: LaunchDetailsModalProps) {
+export function LaunchDetailsModal({ launch, onClose, isLoading, errorMessage }: LaunchDetailsModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -23,6 +25,12 @@ export function LaunchDetailsModal({ launch, onClose }: LaunchDetailsModalProps)
   useEffect(() => {
     dialogRef.current?.focus()
   }, [])
+
+  const resourceLinks = [
+    { label: 'Wikipedia', url: launch.links.wikipedia },
+    { label: 'Webcast', url: launch.links.webcast },
+    { label: 'Article', url: launch.links.article },
+  ]
 
   return (
     <div className="modal-overlay" role="presentation" onClick={onClose}>
@@ -55,22 +63,20 @@ export function LaunchDetailsModal({ launch, onClose }: LaunchDetailsModalProps)
         </header>
 
         <section className="modal__body">
+          {isLoading && <p className="modal__status">Refreshing mission details…</p>}
+          {errorMessage && <p className="modal__status modal__status--error">{errorMessage}</p>}
           <p className="modal__details">{launch.details ?? 'No additional mission details provided.'}</p>
           <div className="modal__links">
-            {launch.links.wikipedia && (
-              <a href={launch.links.wikipedia} target="_blank" rel="noreferrer">
-                Wikipedia
-              </a>
-            )}
-            {launch.links.webcast && (
-              <a href={launch.links.webcast} target="_blank" rel="noreferrer">
-                Webcast
-              </a>
-            )}
-            {launch.links.article && (
-              <a href={launch.links.article} target="_blank" rel="noreferrer">
-                Article
-              </a>
+            {resourceLinks.map(({ label, url }) =>
+              url ? (
+                <a key={label} href={url} target="_blank" rel="noreferrer">
+                  {label}
+                </a>
+              ) : (
+                <span key={label} className="modal__link-disabled">
+                  {label} unavailable
+                </span>
+              ),
             )}
           </div>
         </section>

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import './App.css'
-import { fetchLaunches } from './api/spacex'
+import { fetchLaunches, fetchLaunchById } from './api/spacex'
 import type { Launch } from './types'
 import { useDebouncedValue } from './hooks/useDebouncedValue'
 import { LaunchFilters } from './components/LaunchFilters'
@@ -13,6 +13,9 @@ import { Pagination } from './components/Pagination'
 function App() {
   const [launches, setLaunches] = useState<Launch[]>([])
   const [selectedLaunch, setSelectedLaunch] = useState<Launch | null>(null)
+  const [selectedLaunchId, setSelectedLaunchId] = useState<string | null>(null)
+  const [selectedLaunchLoading, setSelectedLaunchLoading] = useState(false)
+  const [selectedLaunchError, setSelectedLaunchError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -101,6 +104,51 @@ function App() {
     return filteredLaunches.slice(start, start + PAGE_SIZE)
   }, [filteredLaunches, currentPage])
 
+  useEffect(() => {
+    if (!selectedLaunchId) {
+      return
+    }
+
+    let ignore = false
+
+    const loadLaunchDetails = async () => {
+      try {
+        setSelectedLaunchLoading(true)
+        const launch = await fetchLaunchById(selectedLaunchId)
+        if (!ignore && launch) {
+          setSelectedLaunch(launch)
+          setSelectedLaunchError(null)
+        }
+      } catch (err) {
+        if (!ignore) {
+          setSelectedLaunchError('Unable to refresh mission details.')
+        }
+      } finally {
+        if (!ignore) {
+          setSelectedLaunchLoading(false)
+        }
+      }
+    }
+
+    loadLaunchDetails()
+
+    return () => {
+      ignore = true
+    }
+  }, [selectedLaunchId])
+
+  const handleSelectLaunch = (launch: Launch) => {
+    setSelectedLaunch(launch)
+    setSelectedLaunchId(launch.id)
+    setSelectedLaunchError(null)
+  }
+
+  const handleCloseModal = () => {
+    setSelectedLaunch(null)
+    setSelectedLaunchId(null)
+    setSelectedLaunchError(null)
+  }
+
   return (
     <div className="app">
       <header className="app__header">
@@ -143,7 +191,7 @@ function App() {
         <>
           <LaunchList
             launches={paginatedLaunches}
-            onSelect={setSelectedLaunch}
+            onSelect={handleSelectLaunch}
             onToggleFavorite={toggleFavorite}
             isFavorite={isFavorite}
             emptyMessage={
@@ -163,7 +211,12 @@ function App() {
       )}
 
       {selectedLaunch && (
-        <LaunchDetailsModal launch={selectedLaunch} onClose={() => setSelectedLaunch(null)} />
+        <LaunchDetailsModal
+          launch={selectedLaunch}
+          onClose={handleCloseModal}
+          isLoading={selectedLaunchLoading}
+          errorMessage={selectedLaunchError}
+        />
       )}
     </div>
   )
