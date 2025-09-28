@@ -45,6 +45,14 @@ export function LaunchCard({ launch, isFavorite, onToggleFavorite, onSelect }: L
     [launch, onSelect],
   )
 
+  const handleViewDetails = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      event.stopPropagation()
+      onSelect(launch)
+    },
+    [launch, onSelect],
+  )
+
   return (
     <article
       className="launch-card"
@@ -54,7 +62,11 @@ export function LaunchCard({ launch, isFavorite, onToggleFavorite, onSelect }: L
       onKeyDown={handleKeyDown}
       aria-label={`View details for ${launch.name}`}
     >
-      <div className="launch-card__actions">
+      <header className="launch-card__header">
+        <div className="launch-card__title">
+          <h2>{launch.name}</h2>
+          <Badge variant={variant}>{label}</Badge>
+        </div>
         <button
           type="button"
           className="launch-card__favorite"
@@ -64,13 +76,12 @@ export function LaunchCard({ launch, isFavorite, onToggleFavorite, onSelect }: L
         >
           <span aria-hidden="true">{isFavorite ? '★' : '☆'}</span>
         </button>
-      </div>
-      <header className="launch-card__header">
-        <h2>{launch.name}</h2>
-        <Badge variant={variant}>{label}</Badge>
       </header>
       <p className="launch-card__date">{formatLaunchDate(launch.dateUtc)}</p>
       <p className="launch-card__rocket">Rocket: {launch.rocketName}</p>
+      <button type="button" className="launch-card__details" onClick={handleViewDetails}>
+        View details
+      </button>
     </article>
   )
 }

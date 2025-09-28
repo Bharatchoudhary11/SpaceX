@@ -6,8 +6,6 @@ interface LaunchFiltersProps {
   onYearChange: (value: string) => void
   showSuccessOnly: boolean
   onShowSuccessOnlyChange: (value: boolean) => void
-  showFavoritesOnly: boolean
-  onShowFavoritesOnlyChange: (value: boolean) => void
 }
 
 export function LaunchFilters({
@@ -18,8 +16,6 @@ export function LaunchFilters({
   onYearChange,
   showSuccessOnly,
   onShowSuccessOnlyChange,
-  showFavoritesOnly,
-  onShowFavoritesOnlyChange,
 }: LaunchFiltersProps) {
   return (
     <section className="filters">
@@ -50,25 +46,14 @@ export function LaunchFilters({
         </select>
       </div>
 
-      <div className="toggle-group" role="group" aria-label="Filters">
-        <label className="toggle">
-          <input
-            type="checkbox"
-            checked={showSuccessOnly}
-            onChange={(event) => onShowSuccessOnlyChange(event.target.checked)}
-          />
-          Successful launches only
-        </label>
-
-        <label className="toggle">
-          <input
-            type="checkbox"
-            checked={showFavoritesOnly}
-            onChange={(event) => onShowFavoritesOnlyChange(event.target.checked)}
-          />
-          Favorites only
-        </label>
-      </div>
+      <label className="toggle">
+        <input
+          type="checkbox"
+          checked={showSuccessOnly}
+          onChange={(event) => onShowSuccessOnlyChange(event.target.checked)}
+        />
+        Successful launches only
+      </label>
     </section>
   )
 }

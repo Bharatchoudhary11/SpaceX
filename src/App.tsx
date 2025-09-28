@@ -81,8 +81,18 @@ function App() {
   return (
     <div className="app">
       <header className="app__header">
-        <h1>SpaceX Mission Explorer</h1>
-        <p>Browse SpaceX launches, filter by mission, and dive into mission details.</p>
+        <div className="app__intro">
+          <h1>SpaceX Mission Explorer</h1>
+          <p>Browse SpaceX launches, filter by mission, and dive into mission details.</p>
+        </div>
+        <label className="favorites-toggle">
+          <input
+            type="checkbox"
+            checked={showFavoritesOnly}
+            onChange={(event) => setShowFavoritesOnly(event.target.checked)}
+          />
+          Favorites only
+        </label>
       </header>
 
       <LaunchFilters
@@ -93,8 +103,6 @@ function App() {
         onYearChange={setSelectedYear}
         showSuccessOnly={showSuccessOnly}
         onShowSuccessOnlyChange={setShowSuccessOnly}
-        showFavoritesOnly={showFavoritesOnly}
-        onShowFavoritesOnlyChange={setShowFavoritesOnly}
       />
 
       {loading ? (
