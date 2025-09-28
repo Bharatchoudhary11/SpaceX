@@ -8,6 +8,7 @@ import { LaunchList } from './components/LaunchList'
 import { LaunchDetailsModal } from './components/LaunchDetailsModal'
 import { useFavorites } from './context/FavoritesContext'
 import { LaunchSkeletonList } from './components/LaunchSkeletonList'
+import { Pagination } from './components/Pagination'
 
 function App() {
   const [launches, setLaunches] = useState<Launch[]>([])
@@ -19,6 +20,7 @@ function App() {
   const [selectedYear, setSelectedYear] = useState('')
   const [showSuccessOnly, setShowSuccessOnly] = useState(false)
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
 
   const { favorites, toggleFavorite, isFavorite } = useFavorites()
 
@@ -78,6 +80,27 @@ function App() {
     })
   }, [launches, debouncedSearch, selectedYear, showSuccessOnly, showFavoritesOnly, favorites])
 
+  const PAGE_SIZE = 9
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [debouncedSearch, selectedYear, showSuccessOnly, showFavoritesOnly])
+
+  const totalPages = useMemo(() => {
+    return Math.max(1, Math.ceil(filteredLaunches.length / PAGE_SIZE) || 1)
+  }, [filteredLaunches.length])
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages)
+    }
+  }, [currentPage, totalPages])
+
+  const paginatedLaunches = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE
+    return filteredLaunches.slice(start, start + PAGE_SIZE)
+  }, [filteredLaunches, currentPage])
+
   return (
     <div className="app">
       <header className="app__header">
@@ -117,17 +140,26 @@ function App() {
           {error}
         </p>
       ) : (
-        <LaunchList
-          launches={filteredLaunches}
-          onSelect={setSelectedLaunch}
-          onToggleFavorite={toggleFavorite}
-          isFavorite={isFavorite}
-          emptyMessage={
-            showFavoritesOnly
-              ? 'No favorite missions yet. Browse missions and add some!'
-              : 'No launches match your filters yet.'
-          }
-        />
+        <>
+          <LaunchList
+            launches={paginatedLaunches}
+            onSelect={setSelectedLaunch}
+            onToggleFavorite={toggleFavorite}
+            isFavorite={isFavorite}
+            emptyMessage={
+              showFavoritesOnly
+                ? 'No favorite missions yet. Browse missions and add some!'
+                : 'No launches match your filters yet.'
+            }
+          />
+          {filteredLaunches.length > PAGE_SIZE && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          )}
+        </>
       )}
 
       {selectedLaunch && (
